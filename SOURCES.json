@@ -1,0 +1,146 @@
+[
+  {
+    "file": "assets/discover-your-patronus.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/Discover_Your_Patronus_Case_Study (1).jpg"
+  },
+  {
+    "file": "assets/discover-your-patronus.mp4",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/Discover_Your_Patronus_Case_Study (1).mp4"
+  },
+  {
+    "file": "assets/frontier-within.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/thorne_installation.jpg"
+  },
+  {
+    "file": "assets/frontier-within.mp4",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/thorne_installation.mp4"
+  },
+  {
+    "file": "assets/prometheus.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/prometheus (720p).jpg"
+  },
+  {
+    "file": "assets/prometheus.mp4",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/prometheus (720p).mp4"
+  },
+  {
+    "file": "assets/kaninsky-vr.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/Kandinsky_2000Kbps_720p.jpg"
+  },
+  {
+    "file": "assets/racer.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/racer.jpg"
+  },
+  {
+    "file": "assets/xbox-museum.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/xbox_8_1.jpg"
+  },
+  {
+    "file": "assets/sustainable-horizons.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/sustainable_1_1.jpg"
+  },
+  {
+    "file": "assets/paper-planes.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/paperplanes_1.jpg"
+  },
+  {
+    "file": "assets/secret-sky.jpg",
+    "source": "https://storage.googleapis.com/activetheory-v6.appspot.com/media/secret_sky_2021_recap (1080p)_1.jpg"
+  },
+  {
+    "file": "assets/metal-matcap.jpg",
+    "source": "https://activetheory.net/assets/images/room/matcap-test.jpg"
+  },
+  {
+    "file": "assets/metal-normal.png",
+    "source": "https://activetheory.net/assets/images/pbr/alien_cracked_2_normal.png"
+  },
+  {
+    "file": "assets/spine.bin",
+    "source": "https://activetheory.net/assets/geometry/spine/spine.bin"
+  },
+  {
+    "file": "assets/logo.bin",
+    "source": "https://activetheory.net/assets/geometry/logo/AT_logo.bin"
+  },
+  {
+    "file": "assets/chain.bin",
+    "source": "https://activetheory.net/assets/geometry/work/chainlink.bin"
+  },
+  {
+    "file": "assets/reel.mp4",
+    "source": "https://activetheory.net/assets/video/reel.mp4"
+  },
+  {
+    "file": "assets/base-sand.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/sand.bin"
+  },
+  {
+    "file": "assets/base-sand.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/SAND___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/base-walls.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/walls.bin"
+  },
+  {
+    "file": "assets/base-walls.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/WALLS_CEILING___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/base-structure.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/structure.bin"
+  },
+  {
+    "file": "assets/base-structure.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/STRUCTURE___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/base-rocky_soil.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/rocky_soil.bin"
+  },
+  {
+    "file": "assets/base-rocky_soil.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/ROCKY_SOIL___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/base-pillars.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/pillars.bin"
+  },
+  {
+    "file": "assets/base-pillars.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/PILLARS___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/base-cables.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/cables.bin"
+  },
+  {
+    "file": "assets/base-cables.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/CABLES___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/base-rock_L.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/rock_L.bin"
+  },
+  {
+    "file": "assets/base-rock_L.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/ROCK_L___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/base-rock_R.bin",
+    "source": "https://activetheory.net/assets/geometry/tree_room/rock_R.bin"
+  },
+  {
+    "file": "assets/base-rock_R.jpg",
+    "source": "https://activetheory.net/assets/images/tree_room/ROCK_R___CyclesBake_COMBINED.jpg"
+  },
+  {
+    "file": "assets/reference-interface.woff2",
+    "source": "https://activetheory.net/assets/fonts/NBArchitektStd-Regular-export/NBArchitektStd-Regular.woff2"
+  },
+  {
+    "file": "assets/spine-normal.png",
+    "source": "https://activetheory.net/assets/images/pbr/damaged_road_normal.png"
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "slug": "oerp-manager",
+    "name": "O’ERP Manager",
+    "client": "O’Soft",
+    "description": "La présentation de ce logiciel sera bientôt disponible.",
+    "tags": "Logiciel",
+    "color": "#3c9cab",
+    "image": "assets/oerp-manager.svg",
+    "video": null,
+    "url": null
+  },
+  {
+    "slug": "oscan",
+    "name": "O’Scan",
+    "client": "O’Soft",
+    "description": "La présentation de ce logiciel sera bientôt disponible.",
+    "tags": "Logiciel",
+    "color": "#9d7acb",
+    "image": "assets/oscan.svg",
+    "video": null,
+    "url": null
+  },
+  {
+    "slug": "opass",
+    "name": "O’Pass",
+    "client": "O’Soft",
+    "description": "La présentation de ce logiciel sera bientôt disponible.",
+    "tags": "Logiciel",
+    "color": "#5bbda9",
+    "image": "assets/opass.svg",
+    "video": null,
+    "url": null
+  }
+]
