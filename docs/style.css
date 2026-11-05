@@ -34,3 +34,29 @@ body.in-work .atmosphere{background:radial-gradient(ellipse at 0% 65%,#6952b58a,
 .project-screen:after{background:linear-gradient(135deg,#e4ffe30b,transparent 33%,#48628e13 74%,#05121d22);box-shadow:inset 0 0 25px #04090c38,inset 0 0 0 1px #b2e5df24}
 .screen-title{color:#e0edf3;text-shadow:0 1px 5px #05111e,0 0 16px #c2ecff35}.screen-title small{color:#cfdee9}
 @media(max-width:760px){.project-screen{backdrop-filter:blur(1px) saturate(1.2);-webkit-backdrop-filter:blur(1px) saturate(1.2)}.glass-surface:before{opacity:.14}}
+
+/* Persistent 3D panes: both faces remain in the helix; glass is painted once. */
+.project-screen{backface-visibility:visible;-webkit-backface-visibility:visible;backdrop-filter:none;-webkit-backdrop-filter:none;transition:none}
+.project-screen img,.project-screen video{filter:none}
+.glass-surface{contain:paint}
+@media(max-width:760px){.project-screen{backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+body.webgl-gallery #floating-gallery{display:none}
+body.over-software{cursor:pointer}
+#open-current-product{font-size:12px;border:1px solid #8ab8c655;border-radius:24px;padding:10px 16px}
+
+#filter-buttons{max-height:43vh;overflow-y:auto;scrollbar-width:thin;padding-right:8px} @media(max-width:760px){#filter-buttons{max-height:18dvh;gap:12px 15px}#filters{max-height:34dvh;overflow-y:auto}}
+
+#filter-buttons,#filters{overscroll-behavior:contain}
+
+#filters>.cart-shortcut{display:block;width:100%;margin:10px 0 0;padding:12px 0;border-top:1px solid #9b8acb38;color:#c4deeb;text-align:left;font-size:14px;min-height:42px}#filter-buttons{scrollbar-color:#9ebbc366 transparent}@media(max-width:760px){#filters>.cart-shortcut{font-size:11px;min-height:32px;padding:8px 0;margin-top:4px}}
+
+/* French intro: retain the requested three lines without overlapping the copy. */
+#intro-text h1{font-size:clamp(34px,5vw,96px);white-space:nowrap}
+@media(max-width:760px){#intro-text h1{font-size:9.8vw}}
+
+/* Longer OSoft headline, kept clear of the right-hand paragraph. */
+#intro-text h1{font-size:clamp(24px,2.9vw,60px);line-height:1.16}
+@media(max-width:760px){#intro-text h1{font-size:5.5vw;line-height:1.25}}
+
+#project-media{height:auto}.product-gallery{padding-top:68px}.product-gallery-stage{position:relative;height:min(49vh,520px);background:#03080c;touch-action:pan-y}.product-gallery-stage img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;touch-action:pan-y}.product-gallery-stage>button{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:1px solid #91abb56b;border-radius:50%;background:#06121ee8;color:#e1e9f5;font-size:24px}.photo-previous{left:16px}.photo-next{right:16px}.product-gallery-stage>button[hidden]{display:none}.product-gallery-footer{padding:12px 22px 15px;display:flex;align-items:center;justify-content:space-between;gap:15px}.product-gallery-footer p{font-size:12px;color:#adbfce;margin:0;line-height:1.5}.photo-dots{display:flex;gap:5px;flex-wrap:wrap}.photo-dots button{width:30px;height:30px;padding:0;display:grid;place-items:center}.photo-dots button:after{content:'';width:7px;height:7px;border:1px solid #a4a2cf;border-radius:50%}.photo-dots button[aria-current=true]:after{background:#b6a0e5}.product-gallery button:focus-visible{outline:2px solid #a9dbf1;outline-offset:3px}@media(max-width:760px){.product-gallery-stage{height:32dvh;min-height:190px}.product-gallery-footer{padding:10px 14px;align-items:flex-start}.product-gallery-footer p{font-size:10px}.product-gallery-stage>button{width:40px;height:40px}.photo-previous{left:8px}.photo-next{right:8px}}

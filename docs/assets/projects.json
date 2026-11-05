@@ -1,14 +1,37 @@
 [
   {
     "slug": "oerp-manager",
-    "name": "O’ERP Manager",
+    "name": "O’RP Manager",
     "client": "O’Soft",
     "description": "La présentation de ce logiciel sera bientôt disponible.",
     "tags": "Logiciel",
     "color": "#3c9cab",
     "image": "assets/oerp-manager.svg",
     "video": null,
-    "url": null
+    "url": null,
+    "preview": "analytics",
+    "screenshots": [
+      {
+        "src": "assets/orp-manager/orp-accueil.png",
+        "alt": "O’RP Manager — Accueil",
+        "caption": "Accueil"
+      },
+      {
+        "src": "assets/orp-manager/orp-chantiers.png",
+        "alt": "O’RP Manager — Suivi des chantiers",
+        "caption": "Suivi des chantiers"
+      },
+      {
+        "src": "assets/orp-manager/orp-agenda.png",
+        "alt": "O’RP Manager — Agenda de la semaine",
+        "caption": "Agenda de la semaine"
+      },
+      {
+        "src": "assets/orp-manager/orp-stocks.png",
+        "alt": "O’RP Manager — État des stocks",
+        "caption": "État des stocks"
+      }
+    ]
   },
   {
     "slug": "oscan",
@@ -19,7 +42,8 @@
     "color": "#9d7acb",
     "image": "assets/oscan.svg",
     "video": null,
-    "url": null
+    "url": null,
+    "preview": "scan"
   },
   {
     "slug": "opass",
@@ -30,6 +54,98 @@
     "color": "#5bbda9",
     "image": "assets/opass.svg",
     "video": null,
-    "url": null
+    "url": null,
+    "preview": "transfer"
+  },
+  {
+    "slug": "ostock",
+    "name": "O’Stock",
+    "client": "O’Soft",
+    "description": "Logiciel fictif : nom et visuel provisoires pour cette démonstration.",
+    "tags": "Logiciel",
+    "color": "#70b4b2",
+    "image": "assets/ostock.svg",
+    "video": null,
+    "url": null,
+    "fictional": true,
+    "preview": "grid"
+  },
+  {
+    "slug": "ofacture",
+    "name": "O’Facture",
+    "client": "O’Soft",
+    "description": "Logiciel fictif : nom et visuel provisoires pour cette démonstration.",
+    "tags": "Logiciel",
+    "color": "#ab8bca",
+    "image": "assets/ofacture.svg",
+    "video": null,
+    "url": null,
+    "fictional": true,
+    "preview": "invoice"
+  },
+  {
+    "slug": "oplanning",
+    "name": "O’Planning",
+    "client": "O’Soft",
+    "description": "Logiciel fictif : nom et visuel provisoires pour cette démonstration.",
+    "tags": "Logiciel",
+    "color": "#77b2d6",
+    "image": "assets/oplanning.svg",
+    "video": null,
+    "url": null,
+    "fictional": true,
+    "preview": "calendar"
+  },
+  {
+    "slug": "ocrm",
+    "name": "O’CRM",
+    "client": "O’Soft",
+    "description": "Logiciel fictif : nom et visuel provisoires pour cette démonstration.",
+    "tags": "Logiciel",
+    "color": "#9994dc",
+    "image": "assets/ocrm.svg",
+    "video": null,
+    "url": null,
+    "fictional": true,
+    "preview": "network"
+  },
+  {
+    "slug": "obackup",
+    "name": "O’Backup",
+    "client": "O’Soft",
+    "description": "Logiciel fictif : nom et visuel provisoires pour cette démonstration.",
+    "tags": "Logiciel",
+    "color": "#6abf9e",
+    "image": "assets/obackup.svg",
+    "video": null,
+    "url": null,
+    "fictional": true,
+    "preview": "backup"
+  },
+  {
+    "slug": "odesk",
+    "name": "O’Desk",
+    "client": "O’Soft",
+    "description": "Logiciel fictif : nom et visuel provisoires pour cette démonstration.",
+    "tags": "Logiciel",
+    "color": "#ac95b9",
+    "image": "assets/odesk.svg",
+    "video": null,
+    "url": null,
+    "fictional": true,
+    "preview": "desk"
+  },
+  {
+    "slug": "oanalytics",
+    "name": "O’Analytics",
+    "client": "O’Soft",
+    "description": "Logiciel fictif : nom et visuel provisoires pour cette démonstration.",
+    "tags": "Logiciel",
+    "color": "#6cafcd",
+    "image": "assets/oanalytics.svg",
+    "video": null,
+    "url": null,
+    "fictional": true,
+    "preview": "analytics"
   }
 ]
