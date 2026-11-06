@@ -101,7 +101,10 @@ export async function createWorld(canvas,reduced,pointerField){
   backgroundDust.update(motion,work*(1-leaveSpine),particleEnvelope);
   const atBase=smooth(19.1,21.3,s);const visibleParticles=Math.floor(mix(Math.min(profile.mobile?180:1000,count),count,smooth(.5,3.5,s))*(1-atBase*.9));flatGeometry.setDrawRange(0,Math.min(count,visibleParticles));particles.rotation.y=s*.13;particles.position.copy(spine.position);particles.rotation.z=0;particleWork.value=work;sparks.rotation.y=-motion*.025;sparks.position.copy(spine.position);sparks.position.y-=4;
   const filmAlpha=(1-smooth(3.8,4.25,s))*.9;filmUniforms.uOpacity.value=filmAlpha;filmUniforms.uCut.value=1.1-smooth(1.6,4.05,s)*1.3;filmUniforms.uTime.value=motion;if(autoplayIntro&&filmAlpha>.005&&!filmPlaying&&!reduced&&!galleryState?.modalOpen){film.play().catch(()=>{});filmPlaying=true}else if((filmAlpha<=.005||galleryState?.modalOpen)&&filmPlaying){film.pause();filmPlaying=false}
-  camera.position.x+=(pointer.x*.4-camera.position.x)*.035;camera.position.y+=(-pointer.y*.2-camera.position.y)*.035;
+  // The finale is not pointer-driven: keep the eye safely above the shallow water plane.
+  const cameraParallax=1-smooth(ENDING.galleryStart,20.5,s);
+  camera.position.x+=(pointer.x*.4*cameraParallax-camera.position.x)*.035;camera.position.y+=(-pointer.y*.2*cameraParallax-camera.position.y)*.035;
+  if(cameraParallax===0){camera.position.x=0;camera.position.y=0;}
   camera.position.z=(innerWidth<760?17.5:12);
   if(camera.fov!==35){camera.fov=35;camera.updateProjectionMatrix();}
   spine.scale.setScalar(1);
