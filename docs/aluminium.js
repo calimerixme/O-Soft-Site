@@ -1,3 +1,4 @@
+import {renderProfile as profile} from './render-profile.js';
 import * as THREE from './vendor/three.module.js';
 
 let brushed,metalEnvironment;
@@ -21,7 +22,7 @@ export function createAluminium(darker=false){
   }
   ctx.putImageData(pixels,0,0);brushed=new THREE.CanvasTexture(canvas);brushed.wrapS=brushed.wrapT=THREE.RepeatWrapping;brushed.repeat.set(3,12);
  }
- return new THREE.MeshPhysicalMaterial({name:darker?'Blued steel #283247':'Satin aluminium #A8AFBB',color:darker?'#283247':'#A8AFBB',metalness:.96,roughness:darker?.3:.38,roughnessMap:brushed,envMap:metalEnvironment,envMapIntensity:1.35,clearcoat:.12,clearcoatRoughness:.38});
+ return new THREE.MeshPhysicalMaterial({name:darker?'Blued steel #283247':'Satin aluminium #A8AFBB',color:darker?'#283247':'#A8AFBB',metalness:.96,roughness:darker?.3:.38,roughnessMap:brushed,envMap:metalEnvironment,envMapIntensity:1.35,clearcoat:profile.mobile?0:.12,clearcoatRoughness:.38});
 }
 
 // Shade casing bands per fragment, avoiding triangle-shaped material seams.

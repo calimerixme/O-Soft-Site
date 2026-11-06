@@ -1,25 +1,36 @@
+import {renderProfile as profile} from './render-profile.js';
 import * as THREE from './vendor/three.module.js';
 import {Reflector} from './vendor/addons/objects/Reflector.js';
 import {referenceGeometry} from './geometry.js';
-import {applyParticleWake} from './interaction.js';
-import {MeshSurfaceSampler} from './vendor/addons/math/MeshSurfaceSampler.js';
 import {JOURNEY_END,ENDING} from './journey.js';
 import {weatherRock} from './rock-material.js';
 import {createImageEmblem} from './image-emblem.js';
 import {createOuterGlass} from './outer-glass.js';
 import {createAluminium,createCasingMaterial} from './aluminium.js';
 
-export async function createBaseScene(sourceLogo,pointerField){
+export async function createBaseScene(){
  const descriptors=await (await fetch('assets/base-scene.json')).json();
  const group=new THREE.Group();group.name='Industrial base';group.position.set(0,-3.5,-9);group.scale.setScalar(.7);group.visible=false;
  const shoreWaterLevel={value:-3.15};
  const loader=new THREE.TextureLoader();
  for(const item of descriptors){
+  if(/pillars|base-sand|base-rocky_soil|base-rock_L|base-rock_R|base-cables/.test(item.name))continue;
   const geometry=await referenceGeometry(item.name);const texture=await loader.loadAsync(item.map);texture.colorSpace=THREE.SRGBColorSpace;texture.flipY=true;
   const stone=/soil|sand|rock_/.test(item.name);
   const material=new THREE.MeshStandardMaterial({map:texture,emissiveMap:texture,emissive:'#ffffff',emissiveIntensity:.035,color:stone?'#ffffff':'#a8b7cf',metalness:stone?.02:.78,roughness:stone?.58:.32,envMapIntensity:stone?.08:.65,bumpMap:texture,bumpScale:stone?.065:.018,side:THREE.FrontSide});
   if(stone){material.side=THREE.DoubleSide;material.emissiveIntensity=0;weatherRock(material,{sand:/sand|soil/.test(item.name),waterLevel:shoreWaterLevel});}
   const mesh=new THREE.Mesh(geometry,material);mesh.name=item.name;mesh.position.fromArray(item.position);mesh.rotation.set(...item.rotation.map(THREE.MathUtils.degToRad));mesh.scale.fromArray(item.scale);if(!/pillars|base-sand|base-rocky_soil|base-rock_L|base-rock_R/.test(item.name))group.add(mesh);
+ }
+ // Replace the reference cable tails with complete runs seated in both chamber rings.
+ const lowerCableMaterial=new THREE.MeshStandardMaterial({color:'#0b1424',metalness:.45,roughness:.35,envMapIntensity:.55});
+ for(let i=0;i<16;i++){
+  const a=i*Math.PI*2/16,b=a+.16*Math.sin(i*1.7),r=3.5;
+  const curve=new THREE.CatmullRomCurve3([
+   new THREE.Vector3(Math.cos(a)*r,9.5,Math.sin(a)*r),
+   new THREE.Vector3(Math.cos(a+.1)*3.2,7.2,Math.sin(a+.1)*3.2),
+   new THREE.Vector3(Math.cos(b)*3.1,4.2,Math.sin(b)*3.1),
+   new THREE.Vector3(Math.cos(b)*r,1.9,Math.sin(b)*r)]);
+  const cable=new THREE.Mesh(new THREE.TubeGeometry(curve,profile.mobile?24:40,.035+(i%3)*.009,profile.mobile?4:6,false),lowerCableMaterial);cable.name='Lower cable joined to both chamber rings';group.add(cable);
  }
  // One connected shoreline surface replaces the open, faceted terrain sheets.
  // A broad damp shore with an irregular edge projects into the water.
@@ -35,7 +46,7 @@ export async function createBaseScene(sourceLogo,pointerField){
   const chips=(Math.sin(x*.9+z*.53)*.10+Math.cos(x*1.9-z*.77)*.065+Math.abs(Math.sin(z*2.7+x))*.07)*Math.min(1,u*.4);
   return shoreHeight(x,z)+rise+chips;
  };
- const sandGeometry=new THREE.PlaneGeometry(48,44,144,132);sandGeometry.rotateX(-Math.PI/2);
+ const sandGeometry=new THREE.PlaneGeometry(48,44,profile.mobile?72:144,profile.mobile?66:132);sandGeometry.rotateX(-Math.PI/2);
  const sandPositions=sandGeometry.attributes.position;
  for(let i=0;i<sandPositions.count;i++){const x=sandPositions.getX(i),z=sandPositions.getZ(i);sandPositions.setY(i,shoreHeight(x,z));}
  sandGeometry.computeVertexNormals();
@@ -45,7 +56,7 @@ export async function createBaseScene(sourceLogo,pointerField){
  const bankMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',side:THREE.DoubleSide});
  bankMaterial.userData.solidTerrain=true;weatherRock(bankMaterial,{waterLevel:shoreWaterLevel});
  for(const side of [-1,1]){
-  const geometry=new THREE.PlaneGeometry(25,36,84,100);geometry.rotateX(-Math.PI/2);
+  const geometry=new THREE.PlaneGeometry(25,36,profile.mobile?42:84,profile.mobile?50:100);geometry.rotateX(-Math.PI/2);
   const points=geometry.attributes.position;
   for(let i=0;i<points.count;i++){const x=side*(Math.max(0,points.getX(i)+12.5)+(side<0?3.7:5.3)),z=points.getZ(i)-7;points.setXYZ(i,x,bankHeight(x,z),z);}
   geometry.computeVertexNormals();
@@ -111,9 +122,17 @@ export async function createBaseScene(sourceLogo,pointerField){
   block.scale.set(size*(1.1+rockRandom()),size*(.35+rockRandom()*.45),size*(.7+rockRandom()));block.updateMatrix();gravel.setMatrixAt(i,block.matrix);
  }
  gravel.name='Angular basalt fragments and shoreline gravel';group.add(gravel);
- const reflection=new Reflector(new THREE.PlaneGeometry(100,100),{color:0x667b98,textureWidth:innerWidth<760?512:1024,textureHeight:innerWidth<760?512:1024,clipBias:.003});reflection.rotation.x=-Math.PI*.5;reflection.position.set(0,.5,0);group.add(reflection);
+ const reflection=new Reflector(new THREE.PlaneGeometry(100,100),{color:0x667b98,textureWidth:profile.reflectionSize,textureHeight:profile.reflectionSize,multisample:profile.mobile?0:4,clipBias:.003});reflection.rotation.x=-Math.PI*.5;reflection.position.set(0,.5,0);group.add(reflection);
+ // Reuse the last reflected scene while the water's own ripples keep animating.
+ const refreshReflection=reflection.onBeforeRender;
+ let lastReflection=-Infinity,lastReflectionProgress=-Infinity,currentProgress=0;
+ reflection.onBeforeRender=function(renderer,scene,camera){
+  const now=performance.now()*.001;
+  if(now-lastReflection<1/profile.reflectionFPS&&Math.abs(currentProgress-lastReflectionProgress)<.00001)return;
+  lastReflection=now;lastReflectionProgress=currentProgress;refreshReflection.call(this,renderer,scene,camera);
+ };
  // World-space ripples keep their size as the camera moves; reflection is rough, not a perfect mirror.
- reflection.material.uniforms.uTime={value:0};reflection.material.uniforms.uReveal={value:0};reflection.material.transparent=true;reflection.material.depthWrite=false;
+ reflection.material.uniforms.uTime={value:0};reflection.material.uniforms.uReveal={value:0};reflection.material.transparent=true;reflection.material.depthWrite=true;reflection.renderOrder=-1;
  reflection.material.vertexShader=reflection.material.vertexShader.replace('varying vec4 vUv;','varying vec4 vUv; varying vec3 waterWorld;').replace('vUv = textureMatrix * vec4( position, 1.0 );','vUv = textureMatrix * vec4( position, 1.0 ); waterWorld=(modelMatrix*vec4(position,1.)).xyz;');
  reflection.material.fragmentShader=`
  uniform sampler2D tDiffuse; uniform float uTime; uniform float uReveal;
@@ -124,7 +143,7 @@ export async function createBaseScene(sourceLogo,pointerField){
  void main(){
   vec2 p=waterWorld.xz; float h=waves(p);
   vec2 slope=vec2(waves(p+vec2(.035,0.))-waves(p-vec2(.035,0.)),waves(p+vec2(0.,.035))-waves(p-vec2(0.,.035)));
-  vec2 uv=vUv.xy/vUv.w+slope*vec2(.025,.018);
+  vec2 uv=clamp(vUv.xy/max(vUv.w,.0001)+slope*vec2(.025,.018),vec2(.004),vec2(.996));
   vec3 reflected=texture2D(tDiffuse,uv).rgb*.4;
   reflected+=(texture2D(tDiffuse,uv+vec2(.0018,.0009)).rgb+texture2D(tDiffuse,uv-vec2(.0018,.0009)).rgb)*.2;
   reflected+=(texture2D(tDiffuse,uv+vec2(-.003,.0015)).rgb+texture2D(tDiffuse,uv-vec2(-.003,.0015)).rgb)*.1;
@@ -153,10 +172,11 @@ export async function createBaseScene(sourceLogo,pointerField){
   upperGlass.material.uniforms.uReveal.value=1;
   upperBlue.intensity=wipe.cut<1.13?35:0;upperViolet.intensity=wipe.cut<1.13?18:0;
  },render(progress,time,pointer,dockPose){
+  currentProgress=progress;
   const enter=THREE.MathUtils.smoothstep(progress,ENDING.roomStart,ENDING.roomEnd),settle=THREE.MathUtils.smoothstep(progress,ENDING.roomEnd,JOURNEY_END),alpha=enter;group.visible=alpha>.001;group.position.y=-3.5-(1-enter)*3.2+settle*1.4;group.rotation.y=0;
-  if(dockPose){group.position.set(dockPose.x,dockPose.bottom-10.1*.7,dockPose.z);group.scale.set(dockPose.radiusScale*.5,.7,dockPose.radiusScale*.5);}
-  shoreWaterLevel.value=group.position.y+.5*.7;
+  if(dockPose){group.position.set(dockPose.x,dockPose.bottom-10.1*.5,dockPose.z);group.scale.setScalar(.5);}
+  shoreWaterLevel.value=group.position.y+.5*group.scale.y;
   cageGlass.material.uniforms.uReveal.value=alpha;
-  roomMaterials.forEach(m=>{m.opacity=alpha*(m.isPointsMaterial?.85:1);if(m.userData.solidTerrain){m.transparent=alpha<.999;m.depthWrite=true;}});const logoReveal=THREE.MathUtils.smoothstep(progress,ENDING.logoStart,ENDING.logoEnd);portal.visible=logoReveal>.001;artwork.material.opacity=alpha*logoReveal;reflection.material.uniforms.uReveal.value=alpha;reflection.material.uniforms.uTime.value=time;key.intensity=175+Math.sin(time*.45)*30;rim.intensity=115+Math.sin(time*.37+1)*22;floorLight.intensity=60+Math.sin(time*.53)*12;portal.rotation.set(0,-group.rotation.y,0);portal.position.y=4.82;
+  roomMaterials.forEach(m=>{m.opacity=alpha*(m.isPointsMaterial?.85:1);if(m.userData.solidTerrain){m.depthWrite=true;}});const logoReveal=THREE.MathUtils.smoothstep(progress,ENDING.logoStart,ENDING.logoEnd);portal.visible=logoReveal>.001;artwork.material.opacity=alpha*logoReveal;reflection.material.uniforms.uReveal.value=alpha;reflection.material.uniforms.uTime.value=time;key.intensity=175+Math.sin(time*.45)*30;rim.intensity=115+Math.sin(time*.37+1)*22;floorLight.intensity=60+Math.sin(time*.53)*12;portal.rotation.set(0,-group.rotation.y,0);portal.position.y=4.82;
  }};
 }

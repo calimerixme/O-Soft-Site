@@ -1,3 +1,4 @@
+import {renderProfile as profile} from './render-profile.js';
 import * as THREE from './vendor/three.module.js';
 
 // Almost no face tint: the curved silhouette catches the blue/violet light.
@@ -15,7 +16,7 @@ export function createOuterGlass(radius,height){
     #include <colorspace_fragment>
    }`
  });
- const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,96,1,true),material);
+ const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,profile.mobile?48:96,1,true),material);
  mesh.name='Third glass wall - blue violet silhouette';
  mesh.userData.edgeGlass=true;
  return mesh;

@@ -5,6 +5,6 @@ export const ENDING={
  galleryStart:18.25,galleryEnd:19.45,
  spineStart:18.9,spineEnd:20.65,
  roomStart:18.45,roomEnd:21.3,
- logoStart:22,logoEnd:23.5,
+ logoStart:19.4,logoEnd:21.1,
  cameraStart:20,cameraEnd:23.6
 };

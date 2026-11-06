@@ -1,3 +1,4 @@
+import {renderProfile as profile} from './render-profile.js';
 import * as THREE from './vendor/three.module.js';
 const TRAILS=16;
 export function createPointerField(){
@@ -5,12 +6,13 @@ export function createPointerField(){
  const uniforms={uBrushTrail:{value:trail},uBrushAspect:{value:innerWidth/innerHeight}};
  let history=[],last=null,lastStamp=-100;
  addEventListener('pointermove',event=>{
+  if(profile.mobile||event.pointerType==='touch')return;
   const now=performance.now()*.001,p={x:event.clientX/innerWidth,y:1-event.clientY/innerHeight,t:now};
   const distance=last?Math.hypot((p.x-last.x)*innerWidth,(p.y-last.y)*innerHeight):0;
   if(now-lastStamp>.055||distance>45){p.speed=last?Math.min(1,distance/Math.max(.01,now-last.t)/1400):.3;history.unshift(p);history.length=Math.min(history.length,TRAILS);lastStamp=now;last=p}
  },{passive:true});
  addEventListener('pointerleave',()=>{last=null});
- return {uniforms,update(now){uniforms.uBrushAspect.value=innerWidth/innerHeight;for(let i=0;i<TRAILS;i++){const p=history[i];if(!p){trail[i].set(-5,-5,0,0);continue}const age=now-p.t;trail[i].set(p.x,p.y,Math.exp(-age*1.45)*(.65+p.speed*.35),p.speed)}history=history.filter(p=>now-p.t<4)}};
+ return {uniforms,update(now){if(profile.mobile)return;uniforms.uBrushAspect.value=innerWidth/innerHeight;for(let i=0;i<TRAILS;i++){const p=history[i];if(!p){trail[i].set(-5,-5,0,0);continue}const age=now-p.t;trail[i].set(p.x,p.y,Math.exp(-age*1.45)*(.65+p.speed*.35),p.speed)}history=history.filter(p=>now-p.t<4)}};
 }
 
 export function applyParticleWake(material,field){
@@ -49,6 +51,7 @@ export function applyParticleWake(material,field){
 }
 
 export function createMist(canvas,field,reduced){
+ if(!profile.mist){canvas.hidden=true;return null;}
  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:false,powerPreference:'low-power'});renderer.setPixelRatio(.8);renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x000000,0);
  const uniforms={...field.uniforms,uTime:{value:0},uWork:{value:0}};
  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms,vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',fragmentShader:`
@@ -72,5 +75,6 @@ export function createMist(canvas,field,reduced){
   }`});
  const scene=new THREE.Scene();scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),material));const camera=new THREE.Camera();
  addEventListener('resize',()=>renderer.setSize(innerWidth,innerHeight));
- return {render(scroll,time){uniforms.uTime.value=reduced?0:time;uniforms.uWork.value=THREE.MathUtils.smoothstep(scroll,4.2,5.4)*(1-THREE.MathUtils.smoothstep(scroll,19,20));renderer.render(scene,camera)}};
+ let lastScroll=-1,lastWidth=0,lastVisibility;
+ return {render(scroll,time){const work=THREE.MathUtils.smoothstep(scroll,4.2,5.4)*(1-THREE.MathUtils.smoothstep(scroll,19,20));const visibility=work>.001?'visible':'hidden';if(visibility!==lastVisibility){canvas.style.visibility=visibility;lastVisibility=visibility;}if(work<=.001)return;if(reduced&&scroll===lastScroll&&lastWidth===innerWidth)return;lastScroll=scroll;lastWidth=innerWidth;uniforms.uTime.value=reduced?0:time;uniforms.uWork.value=work;renderer.render(scene,camera)}};
 }

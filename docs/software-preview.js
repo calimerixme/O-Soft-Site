@@ -1,14 +1,15 @@
+import {renderProfile as profile} from './render-profile.js';
 import * as THREE from './vendor/three.module.js';
 
 // One shared animated texture, irrespective of the number of orbiting windows.
 export function createSoftwarePreview(reduced){
- const canvas=document.createElement('canvas');canvas.width=640;canvas.height=432;
- const ctx=canvas.getContext('2d'),texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+ const canvas=document.createElement('canvas');canvas.width=Math.round(640*profile.previewScale);canvas.height=Math.round(432*profile.previewScale);
+ const ctx=canvas.getContext('2d');ctx.setTransform(profile.previewScale,0,0,profile.previewScale,0,0);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
  let last=-Infinity,slug='',start=0;
  const box=(x,y,w,h,r=8)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();ctx.stroke();};
  return {texture,render(product,time){
   const changed=slug!==product.slug;if(changed){slug=product.slug;start=time;last=-Infinity;}
-  if(!changed&&(reduced||time-last<1/24))return;
+  if(!changed&&(reduced||time-last<1/profile.previewFPS))return;
   last=time;const t=reduced?0:time-start,type=product.preview||'analytics';
   const gradient=ctx.createLinearGradient(0,0,640,432);gradient.addColorStop(0,'#09172c');gradient.addColorStop(1,'#052c32');
   ctx.fillStyle=gradient;ctx.fillRect(0,0,640,432);

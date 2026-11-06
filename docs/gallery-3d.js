@@ -71,7 +71,7 @@ export async function createGallery3D(scene,camera,spine,products,onActivate,red
  });
  return {group,update(state,time){
   const {position,alpha,entry,exit}=state;group.visible=alpha>.001;enabled=alpha>.7;
-  if(!group.visible){document.body.classList.remove('over-software');return;}
+  if(!group.visible){if(document.body.classList.contains('over-software'))document.body.classList.remove('over-software');return;}
   const dt=Math.min(.05,last?time-last:.016);last=time;
   const mobile=innerWidth<760,radius=mobile?2.45:3.05;
   const frontZ=.8+radius,unitsPerPixel=2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*(camera.position.z-frontZ)/innerHeight;
@@ -81,7 +81,7 @@ export async function createGallery3D(scene,camera,spine,products,onActivate,red
   group.position.set(spine.position.x,spine.position.y-(1-entry)*pitch+exit*pitch*1.3,spine.position.z);
   group.rotation.set(0,orbit,0);
   
-  const active=Math.round(position),animate=alpha>.5&&!document.querySelector('dialog[open]');
+  const active=Math.round(position),animate=alpha>.001&&!state.modalOpen;
   if(animate)preview.render(products[active],time);
   for(const card of cards){
    const d=card.index-position;
