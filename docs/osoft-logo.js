@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import {applyParticleWake} from './interaction.js';
+import {applyParticleWake} from './interaction.js?v=20261107-preload-1';
 
 export async function createOSoftGeometry(){
  const points=await(await fetch('assets/osoft-outline.json')).json();

@@ -1,11 +1,13 @@
 import * as THREE from './vendor/three.module.js';
-import {applyParticleWake} from './interaction.js';
 export async function createDesktopParticles(scene,pointerField,columnHeight,particleWork){
 let seed=711;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
 const loader=new THREE.TextureLoader(),matcap=await loader.loadAsync('assets/metal-matcap.jpg');matcap.colorSpace=THREE.SRGBColorSpace;
- const count=9000;const particleMaterial=new THREE.MeshMatcapMaterial({matcap,color:'#c9efff'});particleMaterial.onBeforeCompile=shader=>{shader.uniforms.uParticleWork=particleWork;shader.vertexShader='uniform float uParticleWork;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <color_vertex>','#include <color_vertex>\n#if defined(USE_COLOR) || defined(USE_INSTANCING_COLOR)\nvec3 columnTint=mix(vec3(.05,.72,.95),vec3(.55,.18,.92),.5+.5*sin(instanceMatrix[3].y*1.2+instanceMatrix[3].x*2.));vColor=mix(vColor,columnTint,(.55+uParticleWork*.35));\n#endif');shader.fragmentShader=shader.fragmentShader.replace('vec3 outgoingLight = diffuseColor.rgb * matcapColor.rgb;','vec3 outgoingLight = diffuseColor.rgb * (matcapColor.rgb * .9 + vec3(.12));'); };
- // One quarter keeps the cursor wake; the other three quarters never run that shader loop.
- const interactiveCount=Math.ceil(count/4),fixedCount=count-interactiveCount;
+ const particleTime={value:0};
+ const count=9000;const particleMaterial=new THREE.MeshMatcapMaterial({matcap,color:'#c9efff'});particleMaterial.onBeforeCompile=shader=>{shader.uniforms.uParticleWork=particleWork;shader.uniforms.uParticleTime=particleTime;shader.vertexShader='uniform float uParticleWork;uniform float uParticleTime;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <color_vertex>','#include <color_vertex>\n#if defined(USE_COLOR) || defined(USE_INSTANCING_COLOR)\nvec3 columnTint=mix(vec3(.05,.72,.95),vec3(.55,.18,.92),.5+.5*sin(instanceMatrix[3].y*1.2+instanceMatrix[3].x*2.));vColor=mix(vColor,columnTint,(.55+uParticleWork*.35));\n#endif');shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+vec3 anchor=instanceMatrix[3].xyz;float phase=anchor.y*2.31+anchor.x*5.17+anchor.z*3.9;
+float cycle=.5+.5*sin(uParticleTime*(.90+.23*sin(phase))+phase);float breath=mix(.66,1.28,smoothstep(.06,.94,cycle));transformed*=breath;`);shader.fragmentShader=shader.fragmentShader.replace('vec3 outgoingLight = diffuseColor.rgb * matcapColor.rgb;','vec3 outgoingLight = diffuseColor.rgb * (matcapColor.rgb * .9 + vec3(.12));'); };
+ // Preserve all existing instance anchors and appearance; only local size breathes.
+ const interactiveCount=Math.ceil(count/5),fixedCount=count-interactiveCount;
  const particleGeometry=new THREE.IcosahedronGeometry(1,1);
  const fixedMaterial=particleMaterial.clone();const tintShader=particleMaterial.onBeforeCompile;
  fixedMaterial.onBeforeCompile=shader=>{
@@ -17,9 +19,10 @@ const loader=new THREE.TextureLoader(),matcap=await loader.loadAsync('assets/met
    #endif
   `);
  };
+ particleMaterial.customProgramCacheKey=()=> 'breathing-matcap-v2';fixedMaterial.customProgramCacheKey=()=> 'breathing-matcap-attenuated-v2';
  const responsiveParticles=new THREE.InstancedMesh(particleGeometry,particleMaterial,interactiveCount);
  const fixedParticles=new THREE.InstancedMesh(particleGeometry,fixedMaterial,fixedCount);
- responsiveParticles.name='Cursor-reactive particles (25%)';fixedParticles.name='Fixed particles (75%)';
+ responsiveParticles.name='Fixed breathing particles A';fixedParticles.name='Fixed breathing particles B';
  const particles=new THREE.Group();particles.add(fixedParticles,responsiveParticles);
  let responsiveIndex=0,fixedIndex=0;
  const dummy=new THREE.Object3D(),particleColor=new THREE.Color();
@@ -34,12 +37,12 @@ const loader=new THREE.TextureLoader(),matcap=await loader.loadAsync('assets/met
   let x,y,z;
   if(i<count*.38){const c=clouds[Math.floor(random()*clouds.length)];x=c.x+gaussian()*c.spread;y=c.y+gaussian()*(c.spread+.3);z=c.z+gaussian()*c.spread;}
   else {y=(random()-.95)*(columnHeight+3);const strand=i%3;const angle=y*.85+strand*2.094+gaussian()*.32;const radius=i<count*.96?1.45+Math.sin(y*.63+strand)*.65+random()*.7:2.4+random()*1.6;x=Math.cos(angle)*radius;z=Math.sin(angle)*radius;}
-  const size=.004+Math.pow(random(),4)*.057;
-  dummy.position.set(x,y,z);dummy.rotation.set(random()*6,random()*6,random()*6);dummy.scale.setScalar(size);dummy.updateMatrix();const target=i%4===0?responsiveParticles:fixedParticles;const particleIndex=i%4===0?responsiveIndex++:fixedIndex++;target.setMatrixAt(particleIndex,dummy.matrix);
+  const baseSize=(.004+Math.pow(random(),4)*.057)*.85;const size=baseSize*(1.-.08*THREE.MathUtils.smoothstep(baseSize,.028,.052));
+  dummy.position.set(x,y,z);dummy.rotation.set(random()*6,random()*6,random()*6);dummy.scale.setScalar(size);dummy.updateMatrix();const target=i%5===0?responsiveParticles:fixedParticles;const particleIndex=i%5===0?responsiveIndex++:fixedIndex++;target.setMatrixAt(particleIndex,dummy.matrix);
   particleColor.setHSL(.49+random()*.29,.55+random()*.3,.4+random()*.3);target.setColorAt(particleIndex,particleColor);
  }
  particleMaterial.color.setRGB(1,1,1);fixedMaterial.color.setRGB(1,1,1);scene.add(particles);
 
-applyParticleWake(particleMaterial,pointerField);
-return {update(s,time,position,opacity){particles.visible=opacity>.001;particles.position.copy(position);particles.rotation.y=s*.13;responsiveParticles.rotation.y=time*.009;const countVisible=Math.floor(count*opacity);responsiveParticles.count=Math.min(interactiveCount,Math.ceil(countVisible/4));fixedParticles.count=Math.min(fixedCount,countVisible-responsiveParticles.count);}};
+
+return {update(s,time,position,opacity,rotation=0){particles.visible=opacity>.001;if(!particles.visible)return;particles.position.copy(position);particles.rotation.y=rotation;responsiveParticles.rotation.y=0;particleTime.value=time;const countVisible=Math.floor(count*opacity);responsiveParticles.count=Math.min(interactiveCount,Math.ceil(countVisible/5));fixedParticles.count=Math.min(fixedCount,countVisible-responsiveParticles.count);}};
 }

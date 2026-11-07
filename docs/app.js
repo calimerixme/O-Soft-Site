@@ -1,19 +1,21 @@
-import {renderProfile as profile} from './render-profile.js';
-import {createProductGallery} from './product-gallery.js';
-﻿import {createWorld} from './world.js';
-import {createShop} from './shop.js';
-import {JOURNEY_END,ENDING,GALLERY_START,GALLERY_LAST} from './journey.js';
-import {createPointerField,createMist} from './interaction.js';
+import {galleryPlacement} from './gallery-layout.js?v=20261107-preload-1';
+import {renderProfile as profile} from './render-profile.js?v=20261107-preload-1';
+import {createProductGallery} from './product-gallery.js?v=20261107-preload-1';
+﻿import {createWorld} from './world.js?v=20261107-preload-1';
+import {createShop} from './shop.js?v=20261107-preload-1';
+import {JOURNEY_END,ENDING,GALLERY_START,GALLERY_LAST} from './journey.js?v=20261107-preload-1';
+import {createPointerField,createMist} from './interaction.js?v=20261107-preload-1';
 const $=s=>document.querySelector(s),clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=(a,b,v)=>{const t=clamp((v-a)/(b-a));return t*t*(3-2*t)};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const WORK=GALLERY_START,END=19.1;let STEP=1.42;
 $('#journey').style.height=((JOURNEY_END+1)*100)+'vh';
+let starting=true;
 let all=[],filtered=[],cards=[],selected=0,scroll=scrollY/innerHeight,targetScroll=scroll,searchQuery='',world;
 const pointer={x:0,y:0};
 const pointerField=createPointerField();let mist;
 let shop;const productGallery=createProductGallery(document.querySelector('#project-media'));
-function seek(s){if(s>=WORK-.5)prepareGallery();window.scrollTo({top:s*innerHeight,behavior:reduced?'instant':'smooth'})}
+function seek(s){if(starting)return;if(s>=WORK-.5)prepareGallery();window.scrollTo({top:s*innerHeight,behavior:reduced?'instant':'smooth'})}
 function media(p,controls=false){if(p.video){const v=document.createElement('video');v.src=p.video;v.poster=p.image;v.muted=!controls;v.loop=!controls;v.controls=controls;v.playsInline=true;v.preload=controls?'auto':'metadata';return v}const image=new Image();image.src=p.image;image.alt=p.name;return image}
 function openProject(p){productGallery.setProduct(p);$('#project-client').textContent=p.client+' / '+p.tags;$('#project-title').textContent=p.name;$('#project-copy').textContent=p.description;shop.selectProduct(p);openDialog($('#project-panel'))}
 function renderCards(){
@@ -50,15 +52,24 @@ function changeTrack(delta){track=(track+delta+tracks.length)%tracks.length;$('#
 $('#audio').onclick=toggleAudio;$('#next-track').onclick=()=>changeTrack(1);$('#previous-track').onclick=()=>changeTrack(-1);
 function updateScroll(){targetScroll=clamp(scrollY/innerHeight,0,JOURNEY_END);lastInteraction=performance.now();uiDirty=true;}addEventListener('scroll',updateScroll,{passive:true});addEventListener('pointermove',e=>{if(profile.mobile||e.pointerType==='touch')return;pointer.x=e.clientX/innerWidth-.5;pointer.y=e.clientY/innerHeight-.5;lastInteraction=performance.now();},{passive:true});addEventListener('resize',()=>{updateScroll();if($('#contact-panel').open)drawGlobe()});
 // Keep native touch scrolling; accelerate wheel travel without queuing smooth-scroll animations.
-addEventListener('wheel',e=>{const list=e.target.closest?.('#filter-buttons,#filters');if(list&&list.scrollHeight>list.clientHeight)return;if(e.ctrlKey||e.metaKey||document.querySelector('dialog[open]')||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;e.preventDefault();window.scrollBy({top:e.deltaY*unit*1.45,behavior:'instant'})},{passive:false});
+addEventListener('wheel',e=>{if(starting){e.preventDefault();return;}const list=e.target.closest?.('#filter-buttons,#filters');if(list&&list.scrollHeight>list.clientHeight)return;if(e.ctrlKey||e.metaKey||document.querySelector('dialog[open]')||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;e.preventDefault();window.scrollBy({top:e.deltaY*unit*1.45,behavior:'instant'})},{passive:false});
 addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;if(scroll>=WORK-.5&&scroll<END){if(e.key==='ArrowRight')$('#next-project').click();if(e.key==='ArrowLeft')$('#previous-project').click()}});
 let nextFrameAt=0,lastFPS=0;
 let lastVideo=-1,lastTime=0,lastInteraction=-1000,lastUIScroll=-1,lastSelected=-1,lastModal=false,uiDirty=true;
 let galleryPreparation;
 function prepareGallery(){
- if(!world||galleryPreparation)return;
+ if(!world||galleryPreparation)return galleryPreparation;
  galleryPreparation=world.setGallery(all,index=>cards[index]?.el.click()).then(()=>{document.body.classList.add('webgl-gallery');uiDirty=true;}).catch(error=>{console.warn('Gallery fallback:',error.message);});
+ return galleryPreparation;
 }
+const backgroundVideos=new Set();
+addEventListener('visibilitychange',()=>{
+ if(document.hidden){document.querySelectorAll('video').forEach(video=>{if(!video.paused){backgroundVideos.add(video);video.pause();}});}
+ else{
+  for(const video of backgroundVideos){if(video.closest('dialog[open]')||(!world?.galleryReady&&video.closest('.project-screen.playing')))video.play().catch(()=>{});}
+  backgroundVideos.clear();lastVideo=-2;lastInteraction=performance.now();
+ }
+});
 const frameDOM={cue:$('.scroll-cue'),intro:$('#intro-text'),reel:$('#reel'),end:$('#end-message'),gallery:$('#floating-gallery'),index:$('#project-index')};
 const styleCache=new WeakMap();
 function style(element,key,value){const saved=styleCache.get(element)||{};if(saved[key]===value)return;saved[key]=value;styleCache.set(element,saved);if(key.startsWith('--'))element.style.setProperty(key,value);else element.style[key]=value;}
@@ -88,17 +99,45 @@ function frame(time){
  if(selected!==lastSelected||uiDirty){document.querySelectorAll('[data-product]').forEach((button,i)=>{button.classList.toggle('active',i===selected);if(i===selected)button.setAttribute('aria-current','true');else button.removeAttribute('aria-current');});if(cards.length)frameDOM.index.textContent=String(selected+1).padStart(2,'0')+' / '+String(cards.length).padStart(2,'0');lastSelected=selected;}
  uiDirty=false;const mobile=profile.mobile;
  if(!world?.galleryReady&&galleryAlpha>.01)cards.forEach((c,i)=>{const d=i-position,visible=galleryAlpha>.01;c.el.style.visibility=visible?'visible':'hidden';c.el.tabIndex=visible&&Math.abs(d)<.4?0:-1;if(!visible){c.hovered=false;c.lift=0;return;}c.lift+=((c.hovered?1:0)-c.lift)*(reduced?1:1-Math.exp(-dt/.14));
- // A persistent helix: depth and rotation, never per-card fades or hidden backs.
- const angle=d*(Math.PI*2/3),arc=mobile?innerWidth*.8:Math.min(innerWidth*.55,820);
- let x=Math.sin(angle)*arc,y=d*innerHeight*(mobile?.34:.38),z=(Math.cos(angle)-1)*(mobile?400:650);
- const tilt=-angle*180/Math.PI-5;y+=(1-galleryEntry)*innerHeight*.45-galleryExit*innerHeight*.85;
- c.el.style.opacity=galleryAlpha;c.el.style.zIndex=100+Math.round(Math.cos(angle)*50);
- c.el.style.transform=`translate(-50%,-50%) translate3d(${x+pointer.x*8}px,${y+pointer.y*5+(mobile?-innerHeight*.1:0)}px,${z+c.lift*(mobile?24:52)}px) rotateY(${tilt}deg) rotateZ(${Math.sin(angle)*2}deg)`;
+ // Match the WebGL layout, converting world units to CSS perspective pixels.
+ const pixelsPerUnit=innerHeight/(2*Math.tan(35*Math.PI/360)*(mobile?17.5-3.25:12-3.9));
+ const baseWidth=(mobile?innerWidth*.82:Math.min(innerWidth*.49,760))/pixelsPerUnit,width=baseWidth*1.04,height=baseWidth*.673;
+ const layout=galleryPlacement(d,width,height,mobile),front=mobile?2.45:3.1;
+ const depth=(layout.z-front)*pixelsPerUnit;
+ const x=layout.x*pixelsPerUnit,y=-layout.y*pixelsPerUnit+(mobile?-innerHeight*.14:.12*pixelsPerUnit)+(1-galleryEntry)*innerHeight*.45-galleryExit*innerHeight*.85;
+ c.el.style.width=width*pixelsPerUnit+'px';c.el.style.height=height*pixelsPerUnit+'px';
+ c.el.style.opacity=galleryAlpha;c.el.style.zIndex=100+Math.round(layout.z*10);
+ c.el.style.transform=`translate(-50%,-50%) translate3d(${x}px,${y}px,${depth+c.lift*30}px) rotateY(${layout.yaw*180/Math.PI}deg) scale(${layout.scale})`;
  c.el.style.pointerEvents=galleryAlpha>.7?'auto':'none';
  });
 
- const active=galleryAlpha>.5&&!modalOpen?selected:-1;
+ const active=galleryAlpha>.5&&!modalOpen&&!world?.galleryReady?selected:-1;
  if(lastVideo!==active){cards.forEach((card,i)=>{if(card.video){if(i===active&&!reduced){card.video.play().then(()=>card.el.classList.add('playing')).catch(()=>{});card.playing=true;}else{card.video.pause();card.el.classList.remove('playing');card.playing=false;}}});lastVideo=active;}
- pointerField.update(time*.001);if(world)world.render(scroll,time*.001,pointer,$('#contact-panel').open,{position,alpha:galleryAlpha,entry:galleryEntry,exit:galleryExit,modalOpen});if(mist&&!modalOpen)mist.render(scroll,time*.001);
+ if(!profile.mobile&&scroll>4.2&&scroll<20&&!modalOpen)pointerField.update(time*.001);if(world)world.render(scroll,time*.001,pointer,$('#contact-panel').open,{position,alpha:galleryAlpha,entry:galleryEntry,exit:galleryExit,modalOpen});if(mist&&!modalOpen)mist.render(scroll,time*.001);
 }
-async function init(){try{all=await (await fetch('assets/projects.json')).json();STEP=(GALLERY_LAST-WORK)/Math.max(1,all.length-1);shop=createShop(all);renderShortcuts();renderCards();world=await createWorld($('#scene'),reduced,pointerField);document.body.classList.add('scene-ready');if(targetScroll>2.8)prepareGallery();mist=createMist($('#mist'),pointerField,reduced)}catch(e){console.error(e);$('#fallback').hidden=false;$('#loading-status').textContent='ENTERING IN COMPATIBILITY MODE'}finally{$('#loading').classList.add('done');setTimeout(()=>$('#loading').remove(),1200);requestAnimationFrame(frame)}}init();
+async function init(){
+ const loading=document.querySelector('#loading'),status=document.querySelector('#loading-status');
+ const controls=[...document.querySelectorAll('header,main,aside,.gallery-controls')];
+ document.body.classList.add('preparing');controls.forEach(element=>element.inert=true);
+ const report=text=>{status.textContent=text;};
+ try{
+  report('Chargement des logiciels?');
+  all=await (await fetch('assets/projects.json')).json();STEP=(GALLERY_LAST-WORK)/Math.max(1,all.length-1);
+  shop=createShop(all);renderShortcuts();renderCards();
+  report('Pr?paration de la sc?ne?');await document.fonts.ready;
+  world=await createWorld($('#scene'),reduced,pointerField);document.body.classList.add('scene-ready');
+  report('Pr?paration des fen?tres?');await prepareGallery();
+  mist=createMist($('#mist'),pointerField,reduced);
+  await world.prepare(report);
+  // Warm the mist's separate renderer once, then immediately restore its visibility.
+  if(mist){report('Pr?paration de l?atmosph?re?');pointerField.update(0);mist.render(10,0);mist.render(targetScroll,0);}
+  report('Pr?t');
+ }catch(e){console.error(e);$('#fallback').hidden=false;report('Ouverture en mode compatible');}
+ finally{
+  // Restore the real scroll position and present a complete frame before unlocking controls.
+  await new Promise(resolve=>requestAnimationFrame(()=>{frame(performance.now());resolve();}));
+  starting=false;controls.forEach(element=>element.inert=false);document.body.classList.remove('preparing');
+  loading.classList.add('done');setTimeout(()=>loading.remove(),1200);
+ }
+}
+init();

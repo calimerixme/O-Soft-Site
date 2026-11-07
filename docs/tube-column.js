@@ -1,7 +1,7 @@
-import {renderProfile as profile} from './render-profile.js';
+import {renderProfile as profile} from './render-profile.js?v=20261107-preload-1';
 import * as THREE from './vendor/three.module.js';
-import {createOuterGlass} from './outer-glass.js';
-import {createAluminium} from './aluminium.js';
+import {createOuterGlass} from './outer-glass.js?v=20261107-preload-1';
+import {createAluminium} from './aluminium.js?v=20261107-preload-1';
 // Concatenate once at construction; every source uses position/normal/uv.
 function mergeGeometries(parts){
  const merged=new THREE.BufferGeometry();let vertices=0,indexCount=0;
@@ -46,19 +46,18 @@ export function createTubeColumn(height){
  const ring=(r,t,y,material=steel)=>{if(t>.06){const profile=[[r-t,-t*.55],[r+t,-t*.55],[r+t,t*.55],[r-t,t*.55],[r-t,-t*.55]].map(p=>new THREE.Vector2(...p));return add(new THREE.LatheGeometry(profile,ringSegments),material,y);}const mesh=add(new THREE.TorusGeometry(r,t,profile.mobile?6:10,ringSegments),material,y);mesh.rotation.x=Math.PI/2;return mesh;};
  // The open glass shell leaves the black cable bundle visible from every angle.
  add(new THREE.CylinderGeometry(.72,.72,height,radialSegments,1,true),glass,-height/2);
- const outerGlass=glass.clone();outerGlass.opacity=.025;outerGlass.color.set('#7770a1');
- add(new THREE.CylinderGeometry(1.03,1.03,height,radialSegments,1,true),outerGlass,-height/2);
  const thirdWall=createOuterGlass(2.1,height);thirdWall.position.y=-height/2;group.add(thirdWall);
- // A slender blue light spine behind the cables, inside both glass walls.
+ // A centered diffuse beam faces the view while the conduit rotates around its axis.
  const glowMaterial=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-  vertexShader:'varying vec2 vGlowUV;void main(){vGlowUV=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-  fragmentShader:`varying vec2 vGlowUV;void main(){float x=(vGlowUV.x-.5)*2.;float glow=exp(-x*x*34.)*.34+exp(-x*x*5.)*.065;
+  vertexShader:'varying vec2 vGlowUV;void main(){vGlowUV=uv;vec4 axis=modelViewMatrix*vec4(0.,position.y,0.,1.);axis.x+=position.x;gl_Position=projectionMatrix*axis;}',
+  fragmentShader:`varying vec2 vGlowUV;void main(){float x=(vGlowUV.x-.5)*2.;float glow=exp(-x*x*34.)*.62+exp(-x*x*5.)*.13;
    glow*=smoothstep(0.,.018,vGlowUV.y)*smoothstep(0.,.018,1.-vGlowUV.y);
-   gl_FragColor=vec4(.13,.42,.9,glow);
+   vec3 violet=mix(vec3(.46,.22,1.),vec3(1.02,.86,1.55),exp(-x*x*40.));
+   gl_FragColor=vec4(violet,glow);
    #include <tonemapping_fragment>
    #include <colorspace_fragment>
   }`});
- const halo=add(new THREE.PlaneGeometry(.7,height),glowMaterial,-height/2);halo.position.z=-.32;
+ const halo=add(new THREE.PlaneGeometry(.7,height),glowMaterial,-height/2);halo.position.z=0;
  for(let y=0;y>=-height;y-=2.45){ring(1.035,.011,y,steel);ring(.725,.008,y,steel);}
  for(const [r,t,y] of [[1.09,.07,0],[1.29,.15,.12],[1.57,.2,.3],[1.82,.14,.5],[1.07,.065,-height]])ring(r,t,y);
  ring(1.1,.012,-.03,blue);ring(1.45,.01,.23,blue);ring(1.055,.012,-height+.04,blue);
@@ -74,12 +73,6 @@ export function createTubeColumn(height){
   }
   add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),profile.mobile?32:96,.02+(i%4)*.004,profile.mobile?4:6,false),black);
   const bolt=add(new THREE.CylinderGeometry(.034,.034,.05,6),trim,.58);bolt.position.set(Math.cos(a)*1.62,.58,Math.sin(a)*1.62);
- }
- // Narrow reflected streaks read as curved glass rather than a solid plastic tube.
- for(let i=0;i<4;i++){
-  const a=i*Math.PI/2+.35;
-  const streak=add(new THREE.CylinderGeometry(1.035,1.035,height,4,1,true,a,.012),i%2?blue:violet,-height/2);
-  streak.material=streak.material.clone();streak.material.transparent=true;streak.material.opacity=i%2?.055:.11;streak.material.depthWrite=false;
  }
  // Spaced service chambers: paired flanges, bolted bridges and slack cable runs.
  // Bake these static parts into three meshes rather than adding per-frame work.

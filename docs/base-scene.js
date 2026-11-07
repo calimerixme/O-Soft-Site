@@ -1,12 +1,12 @@
-import {renderProfile as profile} from './render-profile.js';
+import {renderProfile as profile} from './render-profile.js?v=20261107-preload-1';
 import * as THREE from './vendor/three.module.js';
 import {Reflector} from './vendor/addons/objects/Reflector.js';
-import {referenceGeometry} from './geometry.js';
-import {JOURNEY_END,ENDING} from './journey.js';
-import {weatherRock} from './rock-material.js';
-import {createImageEmblem} from './image-emblem.js';
-import {createOuterGlass} from './outer-glass.js';
-import {createAluminium,createCasingMaterial} from './aluminium.js';
+import {referenceGeometry} from './geometry.js?v=20261107-preload-1';
+import {JOURNEY_END,ENDING} from './journey.js?v=20261107-preload-1';
+import {weatherRock} from './rock-material.js?v=20261107-preload-1';
+import {createImageEmblem} from './image-emblem.js?v=20261107-preload-1';
+import {createOuterGlass} from './outer-glass.js?v=20261107-preload-1';
+import {createAluminium,createCasingMaterial} from './aluminium.js?v=20261107-preload-1';
 
 export async function createBaseScene(){
  const descriptors=await (await fetch('assets/base-scene.json')).json();
@@ -165,7 +165,7 @@ export async function createBaseScene(){
  // Continue the outer sleeve down to the existing cage floor, around its logo.
  const cageGlass=createOuterGlass(4.2,8.6);cageGlass.position.set(0,5.8,0);group.add(cageGlass);
  const roomMaterials=[];group.traverse(o=>{if(o.material&&o!==reflection&&!o.userData.edgeGlass){o.material.transparent=true;roomMaterials.push(o.material)}});
- return {group,upperAssembly,renderUpper(anchor,visible,wipe){upperAssembly.visible=visible;upperAssembly.position.copy(anchor);
+ return {group,upperAssembly,renderUpper(anchor,visible,wipe){upperAssembly.visible=visible;if(!visible)return;upperAssembly.position.copy(anchor);
   upperWipe.uUpperCut.value=wipe.cut;upperWipe.uUpperTime.value=wipe.time;upperWipe.uUpperResolution.value.copy(wipe.resolution);
   upperParts.forEach(part=>part.visible=wipe.cut<1.13);
   revealMaterials.forEach(m=>{m.opacity=1;m.depthWrite=true;});
@@ -173,7 +173,7 @@ export async function createBaseScene(){
   upperBlue.intensity=wipe.cut<1.13?35:0;upperViolet.intensity=wipe.cut<1.13?18:0;
  },render(progress,time,pointer,dockPose){
   currentProgress=progress;
-  const enter=THREE.MathUtils.smoothstep(progress,ENDING.roomStart,ENDING.roomEnd),settle=THREE.MathUtils.smoothstep(progress,ENDING.roomEnd,JOURNEY_END),alpha=enter;group.visible=alpha>.001;group.position.y=-3.5-(1-enter)*3.2+settle*1.4;group.rotation.y=0;
+  const enter=THREE.MathUtils.smoothstep(progress,ENDING.roomStart,ENDING.roomEnd),settle=THREE.MathUtils.smoothstep(progress,ENDING.roomEnd,JOURNEY_END),alpha=enter;group.visible=alpha>.001;if(!group.visible)return;group.position.y=-3.5-(1-enter)*3.2+settle*1.4;group.rotation.y=0;
   if(dockPose){group.position.set(dockPose.x,dockPose.bottom-10.1*.5,dockPose.z);group.scale.setScalar(.5);}
   shoreWaterLevel.value=group.position.y+.5*group.scale.y;
   cageGlass.material.uniforms.uReveal.value=alpha;

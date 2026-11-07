@@ -1,4 +1,4 @@
-import {renderProfile as profile} from './render-profile.js';
+import {renderProfile as profile} from './render-profile.js?v=20261107-preload-1';
 import * as THREE from './vendor/three.module.js';
 
 // One shared animated texture, irrespective of the number of orbiting windows.

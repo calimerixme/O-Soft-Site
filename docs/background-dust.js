@@ -1,4 +1,4 @@
-import {renderProfile as profile} from './render-profile.js';
+import {renderProfile as profile} from './render-profile.js?v=20261107-preload-1';
 import * as THREE from './vendor/three.module.js';
 
 // Distant dust has its own clock and deliberately has no pointer-field uniforms.
@@ -13,5 +13,5 @@ export function createBackgroundDust(reduced){
   void main(){vec3 p=position;p.y=mod(p.y+uTime*.065+14.,28.)-14.;p.x+=sin(uTime*.12+aPhase)*.45;p.z+=sin(uTime*.07+aPhase)*.3;vec4 view=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*view;gl_PointSize=clamp(aSize*uHeight/max(1.,-view.z),.9,3.5);vLight=.65+.35*sin(uTime*.21+aPhase);vDepth=exp(-max(0.,-view.z)*.025);}
  `,fragmentShader:`uniform float uOpacity;varying float vLight;varying float vDepth;void main(){vec2 p=gl_PointCoord*2.-1.;float r=dot(p,p);if(r>1.)discard;float soft=exp(-r*3.)*(1.-smoothstep(.5,1.,r));gl_FragColor=vec4(vec3(.32,.39,.52),soft*vLight*vDepth*uOpacity);}`});
  const points=new THREE.Points(geometry,material);points.name='Autonomous background dust';points.frustumCulled=false;
- return {points,update(time,work,opacity=1){points.visible=opacity>.001;uniforms.uTime.value=reduced?0:time;uniforms.uHeight.value=innerHeight;uniforms.uOpacity.value=(.32+work*.3)*opacity;}};
+ return {points,update(time,work,opacity=1){points.visible=opacity>.001;if(!points.visible)return;uniforms.uTime.value=reduced?0:time;uniforms.uHeight.value=innerHeight;uniforms.uOpacity.value=(.32+work*.3)*opacity;}};
 }
